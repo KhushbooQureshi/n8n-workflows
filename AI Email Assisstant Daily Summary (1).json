@@ -1,0 +1,336 @@
+{
+  "name": "AI Email Assisstant Daily Summary",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 9
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "711cfa33-a2ba-497d-8d14-82eec6797979",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "limit": 5,
+        "filters": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "edb4640b-a03f-40fb-bdee-8bbbbaa1440d",
+      "name": "Get many messages",
+      "webhookId": "9abbb705-9814-44df-90aa-290c2812b8e9",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "P1JCYkQN6HZLRfF1",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an email summarizer. Analyze these emails and provide a daily summary.\n\nEmails data: {{ JSON.stringify($json.data) }}\n\nFor each email provide:\n1. Subject\n2. From\n3. Brief summary\n4. Priority level (High/Medium/Low)\n5. Action required (Yes/No)",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        624,
+        0
+      ],
+      "id": "6d2c5e92-4acb-4c89-aa8c-24d3bc67b53c",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        288,
+        208
+      ],
+      "id": "127bd3b4-d5b3-4aea-9da6-8394700dd6b0",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "zZX3Eky49p8EkCoD",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        416,
+        0
+      ],
+      "id": "f92370ca-fa8e-4bc2-854c-237310474b37",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "sendTo": "khushbooq92@gmail.com",
+        "subject": "📧 Your Daily Email Summary",
+        "message": "={{ $('AI Agent').item.json.output }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        976,
+        0
+      ],
+      "id": "d0842fa1-b817-48f7-8348-09f01c9b3bce",
+      "name": "Send a message",
+      "webhookId": "6418dfc3-2cc4-41a0-86c6-9fdb9dece689",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "P1JCYkQN6HZLRfF1",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 9
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        1184,
+        0
+      ],
+      "id": "3c54dcfe-032f-44ec-ab1e-42c23a0274c4",
+      "name": "Schedule Trigger1"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "limit": 5,
+        "filters": {
+          "labelIds": [
+            "UNREAD"
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1392,
+        0
+      ],
+      "id": "51f74d85-97ee-478b-9789-cc2a842d75bf",
+      "name": "Get many messages1",
+      "webhookId": "89aad5c9-d307-4f24-9676-de4f67437e54",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "P1JCYkQN6HZLRfF1",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an email follow-up assistant. Analyze this unread email and identify if it needs a follow-up response.\n\nEmail Subject: {{ $json.subject }}\nFrom: {{ $json.from }}\nContent: {{ $json.snippet }}\nDate: {{ $json.internalDate }}\n\nDetermine:\n1. Does this email need a follow-up? (Yes/No)\n2. Urgency level (High/Medium/Low)\n3. Suggested follow-up action\n4. Recommended reply deadline",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1600,
+        0
+      ],
+      "id": "4e3de740-0275-4869-9866-911683fc9d0d",
+      "name": "AI Agent1"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash-lite",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        1472,
+        208
+      ],
+      "id": "2582c430-a5c8-4b91-873b-5b7dc3bd1a0a",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "zZX3Eky49p8EkCoD",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "khushbooq92@gmail.com",
+        "subject": "=🔔 Follow-Up Reminder: {{ $json.subject }}",
+        "message": "={{ $('AI Agent1').item.json.output }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1952,
+        0
+      ],
+      "id": "bd5c5ae1-5d73-4e17-9b86-8b264275baa8",
+      "name": "Send a message1",
+      "webhookId": "5e15aa70-2d58-4e95-8afc-c0252e322758",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "P1JCYkQN6HZLRfF1",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get many messages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many messages": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger1": {
+      "main": [
+        [
+          {
+            "node": "Get many messages1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many messages1": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "Send a message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "f8f42093-560f-4aee-8911-cd4af2cb18cc",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "81468b7d1826db87d785048b497c3d3c6e96c65d06b510fb0cc897a053d53260"
+  },
+  "nodeGroups": [],
+  "id": "JBIRLnwd4W37vRAw",
+  "tags": []
+}
