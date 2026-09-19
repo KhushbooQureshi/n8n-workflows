@@ -17,7 +17,7 @@
         0,
         0
       ],
-      "id": "711cfa33-a2ba-497d-8d14-82eec6797979",
+      "id": "-----",
       "name": "Schedule Trigger"
     },
     {
@@ -32,12 +32,12 @@
         208,
         0
       ],
-      "id": "edb4640b-a03f-40fb-bdee-8bbbbaa1440d",
+      "id": "-----",
       "name": "Get many messages",
-      "webhookId": "9abbb705-9814-44df-90aa-290c2812b8e9",
+      "webhookId": "-----",
       "credentials": {
         "gmailOAuth2": {
-          "id": "P1JCYkQN6HZLRfF1",
+          "id": "----",
           "name": "Gmail account"
         }
       }
@@ -54,7 +54,7 @@
         624,
         0
       ],
-      "id": "6d2c5e92-4acb-4c89-aa8c-24d3bc67b53c",
+      "id": "----",
       "name": "AI Agent"
     },
     {
@@ -68,11 +68,11 @@
         288,
         208
       ],
-      "id": "127bd3b4-d5b3-4aea-9da6-8394700dd6b0",
+      "id": "-----",
       "name": "Google Gemini Chat Model",
       "credentials": {
         "googlePalmApi": {
-          "id": "zZX3Eky49p8EkCoD",
+          "id": "-----",
           "name": "Google Gemini(PaLM) Api account"
         }
       }
@@ -88,7 +88,7 @@
         416,
         0
       ],
-      "id": "f92370ca-fa8e-4bc2-854c-237310474b37",
+      "id": "-----",
       "name": "Aggregate"
     },
     {
@@ -104,12 +104,12 @@
         976,
         0
       ],
-      "id": "d0842fa1-b817-48f7-8348-09f01c9b3bce",
+      "id": "----",
       "name": "Send a message",
-      "webhookId": "6418dfc3-2cc4-41a0-86c6-9fdb9dece689",
+      "webhookId": "---",
       "credentials": {
         "gmailOAuth2": {
-          "id": "P1JCYkQN6HZLRfF1",
+          "id": "=-----",
           "name": "Gmail account"
         }
       }
@@ -130,7 +130,7 @@
         1184,
         0
       ],
-      "id": "3c54dcfe-032f-44ec-ab1e-42c23a0274c4",
+      "id": "-----",
       "name": "Schedule Trigger1"
     },
     {
@@ -149,12 +149,12 @@
         1392,
         0
       ],
-      "id": "51f74d85-97ee-478b-9789-cc2a842d75bf",
+      "id": "-----",
       "name": "Get many messages1",
-      "webhookId": "89aad5c9-d307-4f24-9676-de4f67437e54",
+      "webhookId": "-----",
       "credentials": {
         "gmailOAuth2": {
-          "id": "P1JCYkQN6HZLRfF1",
+          "id": "-----",
           "name": "Gmail account"
         }
       }
@@ -171,7 +171,7 @@
         1600,
         0
       ],
-      "id": "4e3de740-0275-4869-9866-911683fc9d0d",
+      "id": "-----",
       "name": "AI Agent1"
     },
     {
@@ -185,11 +185,11 @@
         1472,
         208
       ],
-      "id": "2582c430-a5c8-4b91-873b-5b7dc3bd1a0a",
+      "id": "-----",
       "name": "Google Gemini Chat Model1",
       "credentials": {
         "googlePalmApi": {
-          "id": "zZX3Eky49p8EkCoD",
+          "id": "-----",
           "name": "Google Gemini(PaLM) Api account"
         }
       }
@@ -207,12 +207,12 @@
         1952,
         0
       ],
-      "id": "bd5c5ae1-5d73-4e17-9b86-8b264275baa8",
+      "id": "---",
       "name": "Send a message1",
-      "webhookId": "5e15aa70-2d58-4e95-8afc-c0252e322758",
+      "webhookId": "---",
       "credentials": {
         "gmailOAuth2": {
-          "id": "P1JCYkQN6HZLRfF1",
+          "id": "---",
           "name": "Gmail account"
         }
       }
@@ -325,12 +325,12 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "f8f42093-560f-4aee-8911-cd4af2cb18cc",
+  "versionId": "----",
   "meta": {
     "templateCredsSetupCompleted": true,
-    "instanceId": "81468b7d1826db87d785048b497c3d3c6e96c65d06b510fb0cc897a053d53260"
+    "instanceId": "-----"
   },
   "nodeGroups": [],
-  "id": "JBIRLnwd4W37vRAw",
+  "id": "---",
   "tags": []
 }

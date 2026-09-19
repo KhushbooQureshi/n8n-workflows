@@ -1,0 +1,484 @@
+{
+  "name": "Project 3 SEO Audit",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "medgo2u",
+        "formDescription": "Fill in your details to receive a free SEO audit report.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Domain URL",
+              "placeholder": "https://www.medgo2u.com",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Name",
+              "placeholder": "Your Full Name ",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Email Address",
+              "fieldType": "email",
+              "placeholder": "you@gmail.com",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.5,
+      "position": [
+        -272,
+        112
+      ],
+      "id": "--",
+      "name": "On form submission",
+      "webhookId": "----"
+    },
+    {
+      "parameters": {
+        "url": "https://www.googleapis.com/pagespeedonline/v5/runPagespeed",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "url",
+              "value": "={{ $json[\"Domain URL\"] }}"
+            },
+            {
+              "name": "key",
+              "value": "-----"
+            },
+            {
+              "name": "strategy",
+              "value": "desktop"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        112,
+        112
+      ],
+      "id": "-----",
+      "name": "PageSpeed Desktop"
+    },
+    {
+      "parameters": {
+        "url": "https://www.googleapis.com/pagespeedonline/v5/runPagespeed",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "url",
+              "value": "={{ $json[\"Domain URL\"] }}"
+            },
+            {
+              "name": "key",
+              "value": "----"
+            },
+            {
+              "name": "strategy",
+              "value": "mobile"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        112,
+        -240
+      ],
+      "id": "---",
+      "name": "PageSpeed Mobile"
+    },
+    {
+      "parameters": {
+        "numberInputs": 3
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        432,
+        96
+      ],
+      "id": "----",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "jsCode": "const allItems = $input.all();\nconst mobileData = allItems[0].json.lighthouseResult;\nconst desktopData = allItems[1].json.lighthouseResult;\nconst waybackData = allItems[2].json;\n\n// Calculate domain age from wayback timestamp\nlet domainAge = 'Unknown';\nif (waybackData?.archived_snapshots?.closest?.timestamp) {\n  const timestamp = waybackData.archived_snapshots.closest.timestamp;\n  const year = timestamp.substring(0, 4);\n  const month = timestamp.substring(4, 6);\n  const day = timestamp.substring(6, 8);\n  const firstSeen = new Date(`${year}-${month}-${day}`);\n  const today = new Date();\n  const diffMonths = Math.round((today - firstSeen) / (1000 * 60 * 60 * 24 * 30));\n  domainAge = `${diffMonths} months`;\n}\n\nreturn [{\n  json: {\n    domain: mobileData.requestedUrl || mobileData.finalUrl,\n    fetchTime: mobileData.fetchTime,\n    domainAge: domainAge,\n    firstSeenUrl: waybackData?.archived_snapshots?.closest?.url || 'Not found',\n\n    mobile: {\n      performance: Math.round((mobileData.categories?.performance?.score || 0) * 100),\n      fcp: mobileData.audits?.['first-contentful-paint']?.displayValue,\n      lcp: mobileData.audits?.['largest-contentful-paint']?.displayValue,\n      tbt: mobileData.audits?.['total-blocking-time']?.displayValue,\n      cls: mobileData.audits?.['cumulative-layout-shift']?.displayValue,\n      speedIndex: mobileData.audits?.['speed-index']?.displayValue,\n    },\n    desktop: {\n      performance: Math.round((desktopData.categories?.performance?.score || 0) * 100),\n      fcp: desktopData.audits?.['first-contentful-paint']?.displayValue,\n      lcp: desktopData.audits?.['largest-contentful-paint']?.displayValue,\n      tbt: desktopData.audits?.['total-blocking-time']?.displayValue,\n      cls: desktopData.audits?.['cumulative-layout-shift']?.displayValue,\n      speedIndex: desktopData.audits?.['speed-index']?.displayValue,\n    }\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        656,
+        112
+      ],
+      "id": "----",
+      "name": "Process SEO Data"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-3.1-flash-lite",
+          "mode": "list",
+          "cachedResultName": "models/gemini-3.1-flash-lite"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are an SEO expert. Analyze this SEO data and provide:\n1) Executive Summary\n2) Top 5 SEO Issues  \n3) Priority Recommendations\n\nData: {{ JSON.stringify($json) }}"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        832,
+        112
+      ],
+      "id": "----",
+      "name": "Message a model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "----",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const aiOutput = $input.first().json.content.parts[0].text;\n\nconst html = `<!DOCTYPE html>\n<html>\n<head>\n<meta charset=\"UTF-8\">\n<style>\n  body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 40px; color: #333; }\n  h1 { color: #1a1a2e; border-bottom: 3px solid #e74c3c; padding-bottom: 10px; }\n  h2 { color: #16213e; margin-top: 30px; }\n  h3 { color: #0f3460; }\n  pre { white-space: pre-wrap; line-height: 1.8; font-family: Arial, sans-serif; }\n  .header { background: #1a1a2e; color: white; padding: 30px; border-radius: 8px; margin-bottom: 30px; }\n  .header h1 { color: white; border: none; }\n  .footer { margin-top: 40px; text-align: center; color: #999; font-size: 12px; }\n</style>\n</head>\n<body>\n  <div class=\"header\">\n    <h1>SEO Audit Report</h1>\n    <p>Generated on ${new Date().toLocaleDateString()}</p>\n  </div>\n  <pre>${aiOutput}</pre>\n  <div class=\"footer\">Generated by AI SEO Audit System</div>\n</body>\n</html>`;\n\nreturn [{ json: { html } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1168,
+        112
+      ],
+      "id": "-----",
+      "name": "HTML Report Generator"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.pdfshift.io/v3/convert/pdf",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "source",
+              "value": "={{ $json.html }}"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1376,
+        112
+      ],
+      "id": "-----",
+      "name": "Convert to PDF",
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "----",
+          "name": "Unnamed credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('On form submission').first().json['Email Address'] }}",
+        "subject": "Your SEO Audit Report is Ready",
+        "message": "<p>Dear Client,</p> <p>Please find your SEO Audit Report attached.</p> <p>Our AI has analyzed your website and identified key issues and recommendations to improve your search rankings.</p> <p>Best regards,<br>SEO Audit Team</p>",
+        "options": {
+          "attachmentsUi": {
+            "attachmentsBinary": [
+              {}
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1568,
+        112
+      ],
+      "id": "----",
+      "name": "Send a message",
+      "webhookId": "----",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "-----",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://archive.org/wayback/available?url={{ $('On form submission').first().json['Domain URL'] }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        112,
+        560
+      ],
+      "id": "-----",
+      "name": "Wayback Machine",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "url": "=https://openpagerank.com/api/v1.0/getPageRank?domains[]=medgo2u.com",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "API-OPR",
+              "value": "-----"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -576,
+        336
+      ],
+      "id": "---",
+      "name": "SEMrush node"
+    },
+    {
+      "parameters": {
+        "content": "This node's API was paid that's why I have not set it up properly. It's supposed to be connected to On form submission"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -640,
+        528
+      ],
+      "typeVersion": 1,
+      "id": "---",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -288,
+        624
+      ],
+      "id": "-----",
+      "name": "DataForSEO"
+    },
+    {
+      "parameters": {
+        "content": "This node will be added with on form submission"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -352,
+        832
+      ],
+      "typeVersion": 1,
+      "id": "------",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "Connected to on form submission"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -688,
+        1104
+      ],
+      "id": "------",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -656,
+        928
+      ],
+      "id": "-----",
+      "name": "Ahrefs node"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "PageSpeed Mobile",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "PageSpeed Desktop",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Wayback Machine",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PageSpeed Mobile": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PageSpeed Desktop": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Process SEO Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process SEO Data": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "HTML Report Generator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTML Report Generator": {
+      "main": [
+        [
+          {
+            "node": "Convert to PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to PDF": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        []
+      ]
+    },
+    "Wayback Machine": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "----",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "-----"
+  },
+  "nodeGroups": [],
+  "id": "---",
+  "tags": []
+}
